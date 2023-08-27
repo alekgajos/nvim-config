@@ -1,0 +1,22 @@
+return {
+	'nvim-telescope/telescope.nvim',
+	keys = {
+		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "find file" },
+		{ "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "live grep" },
+		{ "<leader>fG", "<cmd>Telescope grep_string<cr>", desc = "grep string" },
+		{ "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "buffers" },
+		{ "<leader>fk", "<cmd>Telescope registers<cr>", desc = "registers" },
+		{ "<leader>fr", "<cmd>Telescope lsp_references<cr>", desc = "references" },
+		{ "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", desc = "symbols" },
+		{ "<leader>fq", "<cmd>Telescope quickfix<cr>", desc = "quickfix" },
+		{ "<leader>sd", "<cmd>Telescope diagnostics<cr>", desc = "diagnostics" },
+		{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "help" },
+		{ "<leader>fc", "<cmd>Telescope commands<cr>", desc = "commands" },
+	},	
+
+	config = function()
+		require("telescope").setup {
+			file_ignore_patterns = { "^target/", "^./.git/", "^build/", "^.cache/" }
+		}
+	end
+}
