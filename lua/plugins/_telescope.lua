@@ -12,6 +12,7 @@ return {
 		{ "<leader>sd", "<cmd>Telescope diagnostics<cr>", desc = "diagnostics" },
 		{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "help" },
 		{ "<leader>fc", "<cmd>Telescope commands<cr>", desc = "commands" },
+		{ "<leader>fC", "<cmd>Telescope colorscheme<cr>", desc = "colorschemes" },
 	},	
 
 	config = function()

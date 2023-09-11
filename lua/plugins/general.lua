@@ -19,6 +19,13 @@ return {
 			}
 		end
 	},
+  -- themes
+  {
+    "RRethy/nvim-base16",
+  },
+  {
+    "navarasu/onedark.nvim",
+  },
 }
 
 
