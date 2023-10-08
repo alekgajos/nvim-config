@@ -1,5 +1,15 @@
 return {
-	"folke/which-key.nvim",
+  -- which-key
+  {"folke/which-key.nvim",
+  event = "VeryLazy",
+  init = function()
+    vim.o.timeout = true
+    vim.o.timeoutlen = 200
+  end,
+  -- note: opts must be there, even if empty
+  --       otherwise setup would not be called!
+  opts = {}
+},
   -- comment.nvim
 	{
 		'numToStr/Comment.nvim',
@@ -14,7 +24,7 @@ return {
 			require('project_nvim').setup {
 				detection_methods = { "lsp", "pattern" },
 				patterns = { ".git", "compile_commands.json", "compile_flags.txt", ".project", "makefile", "Makefile",
-        "pyproject.toml", "build.sbt", "CMakeLists.txt", "Cargo.toml" },
+        "pyproject.toml", "build.sbt", "Cargo.toml" },
 				manual_mode = false,
 			}
 		end
@@ -25,6 +35,11 @@ return {
   },
   {
     "navarasu/onedark.nvim",
+    lazy = false,
+    init = function()
+      require('onedark').setup()
+      vim.cmd([[colorscheme onedark]])
+    end
   },
 }
 

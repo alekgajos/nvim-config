@@ -1,5 +1,9 @@
 return {
 	'nvim-telescope/telescope.nvim',
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+  },
+  lazy = false,
 	keys = {
 		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "find file" },
 		{ "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "live grep" },
@@ -17,7 +21,12 @@ return {
 
 	config = function()
 		require("telescope").setup {
-			file_ignore_patterns = { "^target/", "^./.git/", "^build/", "^.cache/" }
+			file_ignore_patterns = { "^target/", "^./.git/", "^build/", "^.cache/" },
+      defaults = {
+        preview = {
+          treesitter = false
+        }
+      }
 		}
 	end
 }
