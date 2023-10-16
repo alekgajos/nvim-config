@@ -13,7 +13,7 @@ return {
 		{ "<leader>fr", "<cmd>Telescope lsp_references<cr>", desc = "references" },
 		{ "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", desc = "symbols" },
 		{ "<leader>fq", "<cmd>Telescope quickfix<cr>", desc = "quickfix" },
-		{ "<leader>sd", "<cmd>Telescope diagnostics<cr>", desc = "diagnostics" },
+		{ "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "diagnostics" },
 		{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "help" },
 		{ "<leader>fc", "<cmd>Telescope commands<cr>", desc = "commands" },
 		{ "<leader>fC", "<cmd>Telescope colorscheme<cr>", desc = "colorschemes" },

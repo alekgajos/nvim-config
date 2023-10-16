@@ -27,8 +27,6 @@ return
         if not expected_build_dir:exists() then
           print("creating .cppcheck-build directory") 
           expected_build_dir:mkdir()
-        else
-          print("dir existed")
         end
 
         local lint_status, lint = pcall(require, "lint")
