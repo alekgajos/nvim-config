@@ -2,6 +2,9 @@ return {
   { 
     "danymat/neogen", 
     dependencies = "nvim-treesitter/nvim-treesitter", 
+    keys = {
+      {"<leader>dg", "<cmd>:Neogen<cr>", desc = "Docstring generate"}
+    },
     opts = {
       enabled = true,
       languages = {
@@ -13,8 +16,6 @@ return {
       }
     },
     config = true,
-    -- Uncomment next line if you want to follow only stable versions
-    -- version = "*" 
   }
 }
 

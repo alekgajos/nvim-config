@@ -25,6 +25,10 @@ return {
       defaults = {
         preview = {
           treesitter = false
+        },
+        layout_strategy = "flex",
+        layout_config = {
+          flip_columns = 200,
         }
       }
 		}
