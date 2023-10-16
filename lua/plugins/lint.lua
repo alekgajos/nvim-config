@@ -1,5 +1,6 @@
 return
 {
+  {
   "mfussenegger/nvim-lint",
   ft = {"cpp", "python"},
   config=function()
@@ -36,6 +37,15 @@ return
       end,
     })
   end
+},
+{
+  "folke/trouble.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  keys = {
+    {"<leader>tt", "<cmd>:TroubleToggle document_diagnostics<cr>", desc="TroubleToggle"}
+  },
+  opts = {},
+}
 }
 
 

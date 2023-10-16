@@ -10,37 +10,48 @@ return {
   --       otherwise setup would not be called!
   opts = {}
 },
-  -- comment.nvim
-	{
-		'numToStr/Comment.nvim',
-		config = function()
-			require("Comment").setup()
-		end
-	},
-  -- project.nvm
-	{
-		"ahmedkhalf/project.nvim",
-		config = function()
-			require('project_nvim').setup {
-				detection_methods = { "lsp", "pattern" },
-				patterns = { ".git", "compile_commands.json", "compile_flags.txt", ".project", "makefile", "Makefile",
-        "pyproject.toml", "build.sbt", "Cargo.toml" },
-				manual_mode = false,
-			}
-		end
-	},
-  -- themes
-  {
-    "RRethy/nvim-base16",
-  },
-  {
-    "navarasu/onedark.nvim",
-    lazy = false,
-    init = function()
-      require('onedark').setup()
-      vim.cmd([[colorscheme onedark]])
-    end
-  },
+-- comment.nvim
+{
+  'numToStr/Comment.nvim',
+  config = function()
+    require("Comment").setup()
+  end
+},
+-- project.nvm
+{
+  "ahmedkhalf/project.nvim",
+  config = function()
+    require('project_nvim').setup {
+      detection_methods = { "lsp", "pattern" },
+      patterns = { ".git", "compile_commands.json", "compile_flags.txt", ".project", "makefile", "Makefile",
+      "pyproject.toml", "build.sbt", "Cargo.toml" },
+      manual_mode = false,
+    }
+  end
+},
+-- themes
+{
+  "RRethy/nvim-base16",
+},
+{
+  "navarasu/onedark.nvim",
+  lazy = false,
+  init = function()
+    require('onedark').setup()
+    vim.cmd([[colorscheme onedark]])
+  end
+},
+-- visual guides
+{
+  "lukas-reineke/indent-blankline.nvim",
+  main = "ibl",
+  opts = {
+    scope = {
+      show_start = false,
+      show_end = false
+    }
+  } 
+}
 }
 
 
