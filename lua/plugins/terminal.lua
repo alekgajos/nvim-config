@@ -21,5 +21,10 @@ return {
         background = "Normal",
       },
     },
+  },
+  keys = {
+    {"<leader>tl", "<cmd>:ToggleTermSendCurrentLine<cr>", desc = "Term send current line"},
+    {"<leader>tl", "<cmd>:ToggleTermSendVisualLines<cr>", mode="v", desc = "Term send visual lines"},
+    {"<leader>tv", "<cmd>:ToggleTermSendVisualSelection<cr>", mode="v", desc = "Term send visual seletion"},
   }
 }
