@@ -42,7 +42,8 @@ return {
     { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
     { "<leader>dc", function() 
       if vim.fn.filereadable(vim.fn.getcwd() .. "/.vscode/launch.json") then
-        require('dap.ext.vscode').load_launchjs(nil, { lldb = {'c', 'cpp'} })
+        -- require('dap.ext.vscode').load_launchjs(nil, { lldb = {'c', 'cpp'} })
+        require('dap.ext.vscode').load_launchjs(nil, { cppdbg = {'c', 'cpp'} })
       end
       require("dap").continue() 
     end, desc = "Continue" },
@@ -102,6 +103,13 @@ return {
       type = "executable",
       command = "lldb-vscode-14",
       name = "lldb"
+    }
+
+    dap.adapters.cppdbg = {
+      id = "cppdbg",
+      name = "cppdbg",
+      type = "executable",
+      command = "/home/alek/data/software/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7"
     }
 
     -- dap.configurations.cpp = {
