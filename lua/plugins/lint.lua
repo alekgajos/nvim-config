@@ -20,14 +20,16 @@ return
 
     vim.api.nvim_create_autocmd({'BufWritePre', 'InsertLeave'}, {
       pattern = '',
-      callback = function()
+      callback = function(opts)
 
         -- ensure the cppcheck build dir exists
-        local Path = require("plenary.path")
-        local expected_build_dir = Path:new(vim.loop.cwd(), ".cppcheck-build")
-        if not expected_build_dir:exists() then
-          print("creating .cppcheck-build directory") 
-          expected_build_dir:mkdir()
+        if vim.bo[opts.buf].filetype == 'cpp' then
+          local Path = require("plenary.path")
+          local expected_build_dir = Path:new(vim.loop.cwd(), ".cppcheck-build")
+          if not expected_build_dir:exists() then
+            print("creating .cppcheck-build directory") 
+            expected_build_dir:mkdir()
+          end
         end
 
         local lint_status, lint = pcall(require, "lint")

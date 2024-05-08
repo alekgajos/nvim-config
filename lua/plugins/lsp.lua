@@ -8,6 +8,8 @@ return {
     config = function()
       require('lspconfig')['clangd'].setup({})
       require('lspconfig')['rust_analyzer'].setup({})
+      require('lspconfig')['pyright'].setup({})
+      require('lspconfig')['dockerls'].setup({})
     end,
 
     keys = {

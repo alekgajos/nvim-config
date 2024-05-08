@@ -4,8 +4,10 @@ return {
 		highlight = { enable = true },
 		indent = { enable = true },
 		ensure_installed = {
-			"cpp", "lua", "rust", "python", 'latex', 'bash', "json", "yaml",
+			"cpp", "lua", "rust", "python", 'latex', 'bash', "json", "yaml", "terraform"
 		},
+
+    build = ":TSUpdate",
 
 		-- Install parsers synchronously (only applied to `ensure_installed`)
 		sync_install = false,
