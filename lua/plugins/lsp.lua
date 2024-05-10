@@ -10,6 +10,8 @@ return {
       require('lspconfig')['rust_analyzer'].setup({})
       require('lspconfig')['pyright'].setup({})
       require('lspconfig')['dockerls'].setup({})
+      require('lspconfig')['terraformls'].setup({})
+      require('lspconfig')['tflint'].setup({})
     end,
 
     keys = {

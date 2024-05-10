@@ -23,3 +23,13 @@ vim.filetype.add({
     tf = "terraform"
   }
 })
+
+-- fix Treesitter not enabling highlight for Terraform
+vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
+    pattern = "*.tf",
+    callback = function()
+      vim.cmd([[
+        TSEnable highlight
+      ]])
+    end
+  })
