@@ -10,6 +10,8 @@ vim.opt.shiftwidth = 2
 vim.opt.number = true
 vim.opt.relativenumber = true
 
+vim.opt.cursorline = true
+
 -- disgnostics keymaps
 local opts = { noremap = true, silent = true }
 vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)

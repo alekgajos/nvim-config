@@ -4,37 +4,40 @@ return {
     "theHamsta/nvim-dap-virtual-text",
     {
       "rcarriga/nvim-dap-ui",
+      dependencies = {
+        "nvim-neotest/nvim-nio"
+      },
       keys = {
         { "<leader>du", function() require("dapui").toggle({ }) end, desc = "Dap UI" },
         { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
       },
       opts = {
         -- layouts = {
-        --   {
-        --     elements = {
-        --       "watches",
-        --     },
-        --     size = 0.2,
-        --     position = "left",
-        --   },
-        -- },
-        -- controls = {
-        --   enabled = false,
-        -- },
-        -- render = {
-        --   max_value_lines = 3,
-        -- },
-        -- floating = {
-        --   max_height = nil, -- These can be integers or a float between 0 and 1.
-        --   max_width = nil, -- Floats will be treated as percentage of your screen.
-        --   border = "single", -- Border style. Can be "single", "double" or "rounded"
-        --   mappings = {
-        --     close = { "q", "<Esc>" },
-        --   },
-        -- },
-      }
-    }
-  },
+          --   {
+            --     elements = {
+              --       "watches",
+              --     },
+              --     size = 0.2,
+              --     position = "left",
+              --   },
+              -- },
+              -- controls = {
+                --   enabled = false,
+                -- },
+                -- render = {
+                  --   max_value_lines = 3,
+                  -- },
+                  -- floating = {
+                    --   max_height = nil, -- These can be integers or a float between 0 and 1.
+                    --   max_width = nil, -- Floats will be treated as percentage of your screen.
+                    --   border = "single", -- Border style. Can be "single", "double" or "rounded"
+                    --   mappings = {
+                      --     close = { "q", "<Esc>" },
+                      --   },
+                      -- },
+                    }
+                  }
+                },
 
   -- key mappings
   keys = {
@@ -42,8 +45,8 @@ return {
     { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
     { "<leader>dc", function() 
       if vim.fn.filereadable(vim.fn.getcwd() .. "/.vscode/launch.json") then
-        -- require('dap.ext.vscode').load_launchjs(nil, { lldb = {'c', 'cpp'} })
-        require('dap.ext.vscode').load_launchjs(nil, { cppdbg = {'c', 'cpp'} })
+        require('dap.ext.vscode').load_launchjs(nil, { lldb = {'c', 'cpp'}, cppdbg = {'c', 'cpp'} })
+        -- require('dap.ext.vscode').load_launchjs(nil, { cppdbg = {'c', 'cpp'} })
       end
       require("dap").continue() 
     end, desc = "Continue" },
@@ -101,7 +104,7 @@ return {
     -- setup for lldb-vscode
     dap.adapters.lldb = {
       type = "executable",
-      command = "lldb-vscode-14",
+      command = "lldb-vscode-16",
       name = "lldb"
     }
 
@@ -109,12 +112,17 @@ return {
       id = "cppdbg",
       name = "cppdbg",
       type = "executable",
-      command = "/home/alek/data/software/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7"
+      command = "/root/extension/debugAdapters/bin/OpenDebugAD7",
     }
 
+
+    -- these will be merged with configurations defined in $CWD/.vscode/launch.json
+    -- on launching with dap.continue, these can be chosen interactively
+  
+    -- commented out for now to only use per-project configurations
     -- dap.configurations.cpp = {
     --   {
-    --     name = "Launch",
+    --     name = "Launch LLDB",
     --     type = "lldb",
     --     request = "launch",
     --     program = function()
@@ -123,7 +131,19 @@ return {
     --     cwd = "${workspaceFolder}",
     --     stopOnEntry = false,
     --     args = {},
+    --   },
+    --   {
+    --     name = "Launch GDB",
+    --     type = "cppdbg",
+    --     request = "launch",
+    --     program = function()
+    --       return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+    --     end,
+    --     cwd = "${workspaceFolder}",
+    --     stopOnEntry = false,
+    --     args = {},
     --   }
+    --
     -- }
 
     dap.configurations.c = dap.configurations.cpp

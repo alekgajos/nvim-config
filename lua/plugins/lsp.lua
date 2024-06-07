@@ -7,11 +7,11 @@ return {
     },
     config = function()
       require('lspconfig')['clangd'].setup({})
-      require('lspconfig')['rust_analyzer'].setup({})
-      require('lspconfig')['pyright'].setup({})
-      require('lspconfig')['dockerls'].setup({})
-      require('lspconfig')['terraformls'].setup({})
-      require('lspconfig')['tflint'].setup({})
+      -- require('lspconfig')['rust_analyzer'].setup({})
+      -- require('lspconfig')['pyright'].setup({})
+      -- require('lspconfig')['dockerls'].setup({})
+      -- require('lspconfig')['terraformls'].setup({})
+      -- require('lspconfig')['tflint'].setup({})
     end,
 
     keys = {
@@ -21,6 +21,7 @@ return {
       { "K", vim.lsp.buf.hover, desc = "LSP hover" },
       { "<C-k>", vim.lsp.buf.signature_help, desc = "LSP signature help" },
       { "gR", vim.lsp.buf.rename, desc = "LSP rename" },
+      { "ga", vim.lsp.buf.code_action, desc = "LSP code actions" },
       { "gr", vim.lsp.buf.references, desc = "LSP references" },
       { "<space>h", ":ClangdSwitchSourceHeader<CR>", desc = "LSP toggle header/source" },
       { "<space>f", function()
@@ -90,9 +91,11 @@ return {
       }),
       sources = cmp.config.sources({
         { name = 'nvim_lsp' },
-        { name = 'luasnip' }, -- For luasnip users.
-        { name = 'path' }}, 
-        {{ name = 'buffer' },}
+        { name = 'luasnip' },
+        { name = 'path' }, 
+        { name = 'buffer' },
+        { name = 'nvim_lsp_signature_help' },
+      }
         )
       })
     end
@@ -103,6 +106,8 @@ return {
   'hrsh7th/cmp-path',
   'hrsh7th/cmp-cmdline',
   'saadparwaiz1/cmp_luasnip',
+  'hrsh7th/cmp-nvim-lsp-signature-help',
+
   -- snippets
   {
     "L3MON4D3/LuaSnip",
