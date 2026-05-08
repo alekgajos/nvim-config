@@ -1,26 +1,63 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
+vim.g.mapleader = " "
+vim.o.relativenumber = true
+vim.o.number = true
+vim.o.signcolumn = "yes"
+vim.opt.cursorline = true
 
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
--- don't remap map leader key as "\" is fine
--- leader seting must be done before lazy
-vim.keymap.set("n", "<leader>ml", "<cmd>Lazy<cr>")
+-- diagnostics
+vim.diagnostic.config({
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = " ",
+      [vim.diagnostic.severity.WARN] = " ",
+      [vim.diagnostic.severity.INFO] = " ",
+      [vim.diagnostic.severity.HINT] = " ",
+    },
+  },
+  virtual_text = true, -- show inline diagnostics
+})
 
-require("lazy").setup("plugins")
+vim.pack.add({
+	{ src = "https://github.com/akinsho/toggleterm.nvim" },
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+})
 
+require("toggleterm").setup({direction = "float"})
 
-require('general')
--- require('tex')
---require('lsp')
---require('dap')
---require('scala')
+vim.keymap.set("n", "<C-\\>", '<Cmd>ToggleTerm<CR>')
+vim.keymap.set("t", "<C-\\>", '<Cmd>ToggleTerm<CR>')
+
+-- LSP
+vim.lsp.enable("zls")
+
+-- Treesitter
+vim.pack.add({ {src="https://github.com/nvim-treesitter/nvim-treesitter", version="main"} }, { confirm = false })
+
+-- equivalent to :TSUpdate
+require("nvim-treesitter.install").update("all")
+
+require("nvim-treesitter").setup({
+  auto_install = true,
+})
+
+require("nvim-treesitter").install({
+	"bash",
+	"c",
+	"diff",
+	"dockerfile",
+	"html",
+	"ini",
+	"json",
+	"lua",
+	"luadoc",
+	"markdown",
+	"nix",
+	"python",
+	"rust",
+	"toml",
+	"xml",
+	"yaml",
+	"zig",
+})
