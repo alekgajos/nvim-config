@@ -1,13 +1,14 @@
 -- TODO:
 -- [ ] redo groups of keymaps with which-key
 -- [ ] split into the plugins/ directory
--- [ ] neogen
+-- [x] neogen
 -- [ ] DAP
--- [ ] snacks-indent
+-- [x] snacks-indent
 -- [ ] Minuet AI
 -- [ ] Clangd toggle source header
 -- [ ] Check what else is needed for completion with 0.12
 -- [ ] Fugitive?
+-- [ ] Check out diffview
 
 vim.g.mapleader = " "
 vim.o.relativenumber = true
@@ -103,6 +104,44 @@ vim.keymap.set("n", "<leader>lt", function() require("telescope.builtin").lsp_re
   { desc = "Telescope References" })
 
 
+--
+
+local function augroup(name)
+  return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
+end
+
+local completion = vim.g.completion_mode or "blink" -- or 'native' for built-in completion
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = augroup("lsp_attach"),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    local buf = args.buf
+    if client then
+      -- Built-in completion
+      if completion == "native" and client:supports_method("textDocument/completion") then
+        vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+        --
+        local bufopts = { noremap = true, silent = true, buffer = ev.buf }
+        map("n", "grd", vim.lsp.buf.definition, bufopts)
+        map("i", "<C-k>", vim.lsp.completion.get, bufopts) -- open completion menu manually
+      end
+
+      -- Inlay hints
+      if client:supports_method("textDocument/inlayHint") then
+        vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+      end
+
+      if client:supports_method("textDocument/documentColor") then
+        vim.lsp.document_color.enable(true, { bufnr = buf }, {
+          style = "virtual",
+        })
+      end
+    end
+  end,
+})
+
+
+--
 
 -- TODO: Document outline
 
@@ -152,7 +191,6 @@ require("outline").setup({
 
 require("aerial").setup({
   on_attach = function(bufnr)
-    -- Jump forwards/backwards with '{' and '}'
     vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
     vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
     vim.keymap.set("n", "<leader>lA", "<cmd>AerialToggle<CR>", { buffer = bufnr })
@@ -241,3 +279,131 @@ require("neogen").setup({
 )
 
 vim.keymap.set("n", "<leader>dg", "<cmd>Neogen<CR>", { desc = "Docstring generate" })
+
+-- snacks
+vim.pack.add({
+  { src = "https://github.com/folke/snacks.nvim" }
+})
+
+require("snacks").setup({
+  indent = {
+    priority = 1,
+    enabled = true,
+    char = "│",
+    only_scope = false,
+    only_current = false,
+    hl = "SnacksIndent",
+  },
+})
+
+
+-- Minuet
+vim.pack.add({
+  { src = "https://github.com/milanglacier/minuet-ai.nvim" }
+})
+require('minuet').setup {
+
+  -- virtualtext = {
+  --   auto_trigger_ft = { 'python', },
+  --   keymap = {
+  --     -- accept whole completion
+  --     accept = '<A-A>',
+  --     -- accept one line
+  --     accept_line = '<A-a>',
+  --     -- accept n lines (prompts for number)
+  --     -- e.g. "A-z 2 CR" will accept 2 lines
+  --     accept_n_lines = '<A-z>',
+  --     -- Cycle to prev completion item, or manually invoke completion
+  --     prev = '<A-[>',
+  --     -- Cycle to next completion item, or manually invoke completion
+  --     next = '<A-]>',
+  --     dismiss = '<A-e>',
+  --   },
+  -- },
+
+  provider = "codestral",
+
+  -- provider_options = {
+  --
+  --
+  --   codestral = {
+  --     model = 'codestral-latest',
+  --     end_point = 'https://codestral.mistral.ai/v1/fim/completions',
+  --     api_key = 'CODESTRAL_API_KEY',
+  --     stream = true,
+  --      template = {
+  --           prompt = function(context_before_cursor, context_after_cursor, opts) end,
+  --           suffix = function(context_before_cursor, context_after_cursor, opts) end,
+  --       },
+  --     -- template = {
+  --     --   prompt = "See [Prompt Section for default value]",
+  --     --   suffix = "See [Prompt Section for default value]",
+  --     -- },
+  --     optional = {
+  --       stop = { '\n\n' },
+  --       max_tokens = 256,
+  --     },
+  --   },
+  -- },
+  -- ui = {
+  --   virtualtext = true,
+  -- },
+}
+
+-- blink
+vim.pack.add({
+  { src = "https://github.com/Saghen/blink.cmp", version = "v1.6.0" },
+})
+require("blink.cmp").setup({
+  keymap = { preset = 'default' },
+  appearance = {
+    nerd_font_variant = 'mono'
+  },
+  completion = { documentation = { auto_show = true } },
+  sources = {
+    default = { 'lsp', 'path', 'snippets', 'buffer', },
+    -- providers = {
+    --   minuet = {
+    --     name = 'minuet',
+    --     module = 'minuet.blink',
+    --     async = true,
+    --     -- Should match minuet.config.request_timeout * 1000,
+    --     -- since minuet.config.request_timeout is in seconds
+    --     timeout_ms = 3000,
+    --     score_offset = 50, -- Gives minuet higher priority among suggestions
+    --   },
+    -- },
+  },
+  fuzzy = { implementation = "prefer_rust" },
+  keymap = {
+    ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
+    ["<Up>"] = { "select_prev", "fallback" },
+    ["<Down>"] = { "select_next", "fallback" },
+    ["<C-N>"] = { "select_next", "show" },
+    ["<C-P>"] = { "select_prev", "show" },
+    ["<C-J>"] = { "select_next", "fallback" },
+    ["<C-K>"] = { "select_prev", "fallback" },
+    ["<C-U>"] = { "scroll_documentation_up", "fallback" },
+    ["<C-D>"] = { "scroll_documentation_down", "fallback" },
+    ["<C-e>"] = { "hide", "fallback" },
+    ["<CR>"] = { "accept", "fallback" },
+    ["<Tab>"] = {
+      "select_next",
+      "snippet_forward",
+      function(cmp)
+        if has_words_before() or vim.api.nvim_get_mode().mode == "c" then return cmp.show() end
+      end,
+      "fallback",
+    },
+    ["<S-Tab>"] = {
+      "select_prev",
+      "snippet_backward",
+      function(cmp)
+        if vim.api.nvim_get_mode().mode == "c" then return cmp.show() end
+      end,
+      "fallback",
+    },
+  },
+})
+
+vim.keymap.set("i", "<C-j>", require('minuet').make_blink_map)
