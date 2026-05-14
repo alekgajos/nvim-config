@@ -303,23 +303,23 @@ vim.pack.add({
 })
 require('minuet').setup {
 
-  -- virtualtext = {
-  --   auto_trigger_ft = { 'python', },
-  --   keymap = {
-  --     -- accept whole completion
-  --     accept = '<A-A>',
-  --     -- accept one line
-  --     accept_line = '<A-a>',
-  --     -- accept n lines (prompts for number)
-  --     -- e.g. "A-z 2 CR" will accept 2 lines
-  --     accept_n_lines = '<A-z>',
-  --     -- Cycle to prev completion item, or manually invoke completion
-  --     prev = '<A-[>',
-  --     -- Cycle to next completion item, or manually invoke completion
-  --     next = '<A-]>',
-  --     dismiss = '<A-e>',
-  --   },
-  -- },
+  virtualtext = {
+    auto_trigger_ft = { 'cpp',  'python', },
+    keymap = {
+      -- accept whole completion
+      accept = '<A-A>',
+      -- accept one line
+      accept_line = '<A-a>',
+      -- accept n lines (prompts for number)
+      -- e.g. "A-z 2 CR" will accept 2 lines
+      accept_n_lines = '<A-z>',
+      -- Cycle to prev completion item, or manually invoke completion
+      prev = '<A-[>',
+      -- Cycle to next completion item, or manually invoke completion
+      next = '<A-]>',
+      dismiss = '<A-e>',
+    },
+  },
 
   provider = "codestral",
 
@@ -345,9 +345,9 @@ require('minuet').setup {
   --     },
   --   },
   -- },
-  -- ui = {
-  --   virtualtext = true,
-  -- },
+  ui = {
+    virtualtext = true,
+  },
 }
 
 -- blink
@@ -361,18 +361,18 @@ require("blink.cmp").setup({
   },
   completion = { documentation = { auto_show = true } },
   sources = {
-    default = { 'lsp', 'path', 'snippets', 'buffer', },
-    -- providers = {
-    --   minuet = {
-    --     name = 'minuet',
-    --     module = 'minuet.blink',
-    --     async = true,
-    --     -- Should match minuet.config.request_timeout * 1000,
-    --     -- since minuet.config.request_timeout is in seconds
-    --     timeout_ms = 3000,
-    --     score_offset = 50, -- Gives minuet higher priority among suggestions
-    --   },
-    -- },
+    default = { 'lsp', 'path', 'snippets', 'buffer', 'minuet' },
+    providers = {
+      minuet = {
+        name = 'minuet',
+        module = 'minuet.blink',
+        async = true,
+        -- Should match minuet.config.request_timeout * 1000,
+        -- since minuet.config.request_timeout is in seconds
+        timeout_ms = 3000,
+        score_offset = 50, -- Gives minuet higher priority among suggestions
+      },
+    },
   },
   fuzzy = { implementation = "prefer_rust" },
   keymap = {
