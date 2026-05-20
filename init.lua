@@ -4,11 +4,15 @@
 -- [x] neogen
 -- [ ] DAP
 -- [x] snacks-indent
--- [ ] Minuet AI
--- [ ] Clangd toggle source header
+-- [x] Minuet AI
+-- [ ] AMP integration
+-- [ ] OpenCode integration
+-- [x] Clangd toggle source header
 -- [ ] Check what else is needed for completion with 0.12
--- [ ] Fugitive?
+-- [x] NeoGit
 -- [ ] Check out diffview
+-- [x] file browser
+-- [ ] Scala Metals setup
 
 vim.g.mapleader = " "
 vim.o.relativenumber = true
@@ -30,6 +34,7 @@ vim.opt.shiftwidth = 2
 vim.opt.number = true
 vim.opt.relativenumber = true
 
+
 -- colorscheme
 vim.pack.add({
   "https://github.com/navarasu/onedark.nvim",
@@ -38,6 +43,13 @@ require('onedark').setup {
   style = 'darker'
 }
 require('onedark').load()
+
+
+-- which-key
+vim.pack.add({
+  { src = "https://github.com/folke/which-key.nvim" },
+})
+
 
 -- diagnostics
 vim.diagnostic.config({
@@ -52,6 +64,28 @@ vim.diagnostic.config({
   virtual_text = true, -- show inline diagnostics
 })
 
+
+local wk = require("which-key")
+wk.add({
+  { "<leader>e",  group = "Problems" }, -- group
+  { "<leader>pp", vim.diagnostic.open_float, desc = "Peek diagnostics" },
+  { "<leader>pq", vim.diagnostic.setloclist, desc = "Diagnostics to loclist" },
+})
+
+-- file tree
+
+vim.pack.add({
+  { src =   "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/nvim-neo-tree/neo-tree.nvim" }
+})
+
+vim.keymap.set("n", "<leader>e", "<Cmd>Neotree<CR>" , { desc = "File tree"})
+vim.keymap.set("n", "<leader>o", "<Cmd>Neotree toggle<CR>" , { desc = "File tree"})
+
+
+
+-- terminal
+
 vim.pack.add({
   { src = "https://github.com/akinsho/toggleterm.nvim" },
   { src = "https://github.com/neovim/nvim-lspconfig" },
@@ -63,10 +97,6 @@ require("toggleterm").setup({ direction = "float" })
 vim.keymap.set("n", "<C-\\>", '<Cmd>ToggleTerm<CR>')
 vim.keymap.set("t", "<C-\\>", '<Cmd>ToggleTerm<CR>')
 
--- which-key
-vim.pack.add({
-  { src = "https://github.com/folke/which-key.nvim" },
-})
 
 
 -- -- LSP
@@ -117,6 +147,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     local buf = args.buf
     if client then
+      -- Clangd-specific keymaps
+      if client.name == "clangd" then
+        vim.keymap.set("n", "<leader>lw", "<Cmd>LspClangdSwitchSourceHeader<CR>",
+          { buffer = buf, desc = "Switch source/header file" })
+      end
+
       -- Built-in completion
       if completion == "native" and client:supports_method("textDocument/completion") then
         vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
@@ -141,9 +177,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 
---
 
--- TODO: Document outline
 
 -- Treesitter
 vim.pack.add({ { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" } }, { confirm = false })
@@ -158,6 +192,7 @@ require("nvim-treesitter").setup({
 require("nvim-treesitter").install({
   "bash",
   "c",
+  "cpp",
   "diff",
   "dockerfile",
   "html",
@@ -262,6 +297,11 @@ require("lualine").setup({
 )
 
 -- neogen
+
+-- Note:
+-- For Neogen to work with a particular language,
+-- the relevat TreeSitter parser must be installed!
+
 vim.pack.add({
   { src = "https://github.com/danymat/neogen" }
 })
@@ -296,72 +336,68 @@ require("snacks").setup({
   },
 })
 
+vim.keymap.set("n", "<leader>x", require("snacks").explorer.open)
 
 -- Minuet
 vim.pack.add({
   { src = "https://github.com/milanglacier/minuet-ai.nvim" }
 })
-require('minuet').setup {
+if os.getenv("CODESTRAL_API_KEY") then
+  require('minuet').setup {
 
-  virtualtext = {
-    auto_trigger_ft = { 'cpp',  'python', },
-    keymap = {
-      -- accept whole completion
-      accept = '<A-A>',
-      -- accept one line
-      accept_line = '<A-a>',
-      -- accept n lines (prompts for number)
-      -- e.g. "A-z 2 CR" will accept 2 lines
-      accept_n_lines = '<A-z>',
-      -- Cycle to prev completion item, or manually invoke completion
-      prev = '<A-[>',
-      -- Cycle to next completion item, or manually invoke completion
-      next = '<A-]>',
-      dismiss = '<A-e>',
+    virtualtext = {
+      auto_trigger_ft = { 'cpp', 'python', 'zig', 'lua' },
+      keymap = {
+        -- accept whole completion
+        accept = '<A-A>',
+        -- accept one line
+        accept_line = '<A-a>',
+        -- accept n lines (prompts for number)
+        -- e.g. "A-z 2 CR" will accept 2 lines
+        accept_n_lines = '<A-z>',
+        -- Cycle to prev completion item, or manually invoke completion
+        prev = '<A-[>',
+        -- Cycle to next completion item, or manually invoke completion
+        next = '<A-]>',
+        dismiss = '<A-e>',
+      },
     },
-  },
 
-  provider = "codestral",
+    provider = "codestral",
 
-  -- provider_options = {
-  --
-  --
-  --   codestral = {
-  --     model = 'codestral-latest',
-  --     end_point = 'https://codestral.mistral.ai/v1/fim/completions',
-  --     api_key = 'CODESTRAL_API_KEY',
-  --     stream = true,
-  --      template = {
-  --           prompt = function(context_before_cursor, context_after_cursor, opts) end,
-  --           suffix = function(context_before_cursor, context_after_cursor, opts) end,
-  --       },
-  --     -- template = {
-  --     --   prompt = "See [Prompt Section for default value]",
-  --     --   suffix = "See [Prompt Section for default value]",
-  --     -- },
-  --     optional = {
-  --       stop = { '\n\n' },
-  --       max_tokens = 256,
-  --     },
-  --   },
-  -- },
-  ui = {
-    virtualtext = true,
-  },
-}
+    provider_options = {
+
+      codestral = {
+        model = 'codestral-latest',
+        api_key = 'CODESTRAL_API_KEY',
+        optional = {
+          stop = { '\n\n' },
+          max_tokens = 256,
+        },
+      },
+    },
+    ui = {
+      virtualtext = false,
+      -- virtualtext = true,
+    },
+  }
+end
 
 -- blink
 vim.pack.add({
-  { src = "https://github.com/Saghen/blink.cmp", version = "v1.6.0" },
+  { src = "https://github.com/Saghen/blink.cmp" },
 })
 require("blink.cmp").setup({
-  keymap = { preset = 'default' },
   appearance = {
     nerd_font_variant = 'mono'
   },
-  completion = { documentation = { auto_show = true } },
+  completion = {
+    documentation = { auto_show = true },
+    trigger = { prefetch_on_insert = false },
+  },
   sources = {
-    default = { 'lsp', 'path', 'snippets', 'buffer', 'minuet' },
+    default = os.getenv("CODESTRAL_API_KEY") and { 'lsp', 'path', 'snippets', 'buffer', 'minuet' } or
+        { 'lsp', 'path', 'snippets', 'buffer' },
     providers = {
       minuet = {
         name = 'minuet',
@@ -376,6 +412,8 @@ require("blink.cmp").setup({
   },
   fuzzy = { implementation = "prefer_rust" },
   keymap = {
+    preset = 'default',
+    ["<A-y>"] = require('minuet').make_blink_map(),
     ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
     ["<Up>"] = { "select_prev", "fallback" },
     ["<Down>"] = { "select_next", "fallback" },
@@ -406,4 +444,11 @@ require("blink.cmp").setup({
   },
 })
 
-vim.keymap.set("i", "<C-j>", require('minuet').make_blink_map)
+-- Git
+vim.pack.add({
+  { src = "https://github.com/NeogitOrg/neogit" },
+  { src = "https://github.com/lewis6991/gitsigns.nvim" }
+})
+
+vim.keymap.set("n", "<leader>gg", "<cmd>Neogit<cr>", { desc = "Open Neogit UI" })
+vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame<cr>", { desc = "Git blame" })
