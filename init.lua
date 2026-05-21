@@ -75,12 +75,12 @@ wk.add({
 -- file tree
 
 vim.pack.add({
-  { src =   "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/MunifTanjim/nui.nvim" },
   { src = "https://github.com/nvim-neo-tree/neo-tree.nvim" }
 })
 
-vim.keymap.set("n", "<leader>e", "<Cmd>Neotree<CR>" , { desc = "File tree"})
-vim.keymap.set("n", "<leader>o", "<Cmd>Neotree toggle<CR>" , { desc = "File tree"})
+vim.keymap.set("n", "<leader>e", "<Cmd>Neotree<CR>", { desc = "File tree" })
+vim.keymap.set("n", "<leader>o", "<Cmd>Neotree toggle<CR>", { desc = "File tree" })
 
 
 
@@ -224,13 +224,47 @@ require("outline").setup({
   }
 })
 
+-- LSP navigation toggle state
+vim.g.lsp_nav_enabled = true
+
 require("aerial").setup({
   on_attach = function(bufnr)
-    vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
-    vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+    local function set_lsp_nav_keys(enable)
+      if enable then
+        vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr, desc = "Aerial previous symbol" })
+        vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr, desc = "Aerial next symbol" })
+      else
+        vim.keymap.del("n", "{", { buffer = bufnr })
+        vim.keymap.del("n", "}", { buffer = bufnr })
+      end
+    end
+
+    -- Set initial state
+    set_lsp_nav_keys(vim.g.lsp_nav_enabled)
+
+    -- Store for toggle command
+    if not vim.b[bufnr].lsp_nav_toggle then
+      vim.b[bufnr].lsp_nav_toggle = set_lsp_nav_keys
+    end
+
     vim.keymap.set("n", "<leader>lA", "<cmd>AerialToggle<CR>", { buffer = bufnr })
   end,
 })
+
+-- Command to toggle LSP navigation
+vim.api.nvim_create_user_command('LspNav', function()
+  vim.g.lsp_nav_enabled = not vim.g.lsp_nav_enabled
+
+  -- Update keymaps in all buffers with aerial attached
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.b[bufnr].lsp_nav_toggle then
+      vim.b[bufnr].lsp_nav_toggle(vim.g.lsp_nav_enabled)
+    end
+  end
+
+  local status = vim.g.lsp_nav_enabled and "enabled" or "disabled"
+  vim.notify("LSP navigation " .. status, vim.log.levels.INFO)
+end, {})
 
 -- Telescope alternative
 vim.pack.add({
