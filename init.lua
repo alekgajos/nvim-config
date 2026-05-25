@@ -3,16 +3,20 @@
 -- [ ] split into the plugins/ directory
 -- [x] neogen
 -- [ ] DAP
+--   [ ] C++
+--   [ ] Rust
+--   [ ] Python
+--   [ ] Zig
 -- [x] snacks-indent
 -- [x] Minuet AI
--- [ ] AMP integration
+-- [x] AMP integration
 -- [ ] OpenCode integration
 -- [x] Clangd toggle source header
 -- [ ] Check what else is needed for completion with 0.12
 -- [x] NeoGit
 -- [ ] Check out diffview
 -- [x] file browser
--- [ ] Scala Metals setup
+-- [x] Scala Metals setup - use nvim-metals for DAP support!
 
 vim.g.mapleader = " "
 vim.o.relativenumber = true
@@ -43,6 +47,9 @@ require('onedark').setup {
   style = 'darker'
 }
 require('onedark').load()
+vim.api.nvim_set_hl(0, "SignColumn", { bg = "#2b3242" })
+vim.api.nvim_set_hl(0, "LineNr", { bg = "#2b3242" })
+vim.api.nvim_set_hl(0, "CursorLineNr", { bg = "#2b3242" })
 
 
 -- which-key
@@ -52,6 +59,8 @@ vim.pack.add({
 
 
 -- diagnostics
+local virtual_text_enabled = true
+
 vim.diagnostic.config({
   signs = {
     text = {
@@ -61,8 +70,13 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.HINT] = " ",
     },
   },
-  virtual_text = true, -- show inline diagnostics
+  virtual_text = virtual_text_enabled, -- show inline diagnostics
 })
+
+local function toggle_diagnostics()
+  virtual_text_enabled = not virtual_text_enabled
+  vim.diagnostic.config({ virtual_text = virtual_text_enabled })
+end
 
 
 local wk = require("which-key")
@@ -70,6 +84,7 @@ wk.add({
   { "<leader>e",  group = "Problems" }, -- group
   { "<leader>pp", vim.diagnostic.open_float, desc = "Peek diagnostics" },
   { "<leader>pq", vim.diagnostic.setloclist, desc = "Diagnostics to loclist" },
+  { "<leader>pv", toggle_diagnostics,        desc = "Toggle diagnostics" },
 })
 
 -- file tree
@@ -114,6 +129,16 @@ vim.lsp.config('clangd', {
     "clangd",
     "--completion-style=detailed",
     "--header-insertion=never",
+  },
+})
+
+vim.lsp.config('lua_ls', {
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+    },
   },
 })
 
@@ -204,11 +229,55 @@ require("nvim-treesitter").install({
   "nix",
   "python",
   "rust",
+  "scala",
   "toml",
   "xml",
   "yaml",
   "zig",
 })
+
+
+-- DAP
+vim.pack.add({
+  { src = "https://github.com/mfussenegger/nvim-dap" },
+  { src = "https://github.com/nvim-neotest/nvim-nio" },
+  { src = "https://github.com/theHamsta/nvim-dap-virtual-text" },
+  { src = "https://github.com/rcarriga/nvim-dap-ui" },
+})
+
+local dap = require("dap")
+local dapui = require("dapui")
+
+require("nvim-dap-virtual-text").setup({})
+dapui.setup({})
+
+dap.listeners.before.attach.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+  dapui.close()
+end
+
+wk.add({
+  { "<leader>d",  group = "DAP" }, -- group
+  { "<leader>pp", vim.diagnostic.open_float, desc = "Peek diagnostics" },
+  { "<leader>pq", vim.diagnostic.setloclist, desc = "Diagnostics to loclist" },
+  { "<leader>pv", toggle_diagnostics,        desc = "Toggle diagnostics" },
+})
+
+vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "DAP Toggle Breakpoint" })
+vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "DAP Continue" })
+vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "DAP Step Into" })
+vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "DAP Step Over" })
+vim.keymap.set("n", "<leader>dO", dap.step_out, { desc = "DAP Step Out" })
+vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "DAP REPL" })
+vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "DAP UI" })
 
 -- Outline
 vim.pack.add({
@@ -463,7 +532,7 @@ require("blink.cmp").setup({
       "select_next",
       "snippet_forward",
       function(cmp)
-        if has_words_before() or vim.api.nvim_get_mode().mode == "c" then return cmp.show() end
+        if vim.api.nvim_get_mode().mode == "c" then return cmp.show() end
       end,
       "fallback",
     },
@@ -486,3 +555,68 @@ vim.pack.add({
 
 vim.keymap.set("n", "<leader>gg", "<cmd>Neogit<cr>", { desc = "Open Neogit UI" })
 vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame<cr>", { desc = "Git blame" })
+
+-- AMP AI
+vim.pack.add({
+  { src = "https://github.com/sourcegraph/amp.nvim" }
+})
+require("amp").setup({ auto_start = true, log_level = "info" })
+
+
+-- metals for Scala
+
+vim.pack.add({
+  { src = "https://github.com/scalameta/nvim-metals" },
+})
+
+
+local metals_config = {
+  settings = {
+    showImplicitArguments = true,
+    showInferredType = true,
+    showImplicitConversionsAndClasses = true,
+    useGlobalExecutable = true,
+  },
+  init_options = {
+    statusBarProvider = "on",
+  },
+  root_patterns = { "build.sbt", "build.sc", "build.gradle", "build.gradle.kts", "pom.xml" },
+  metals_config = {
+    serverVersion = "latest.snapshot",
+  },
+  on_attach = function(client, bufnr)
+    require("metals").setup_dap()
+  end
+}
+
+local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "scala", "sbt", "java" },
+  callback = function()
+    require("metals").initialize_or_attach(metals_config)
+  end,
+  group = nvim_metals_group,
+})
+
+
+dap.configurations.scala = {
+  {
+    type = "scala",
+    request = "launch",
+    name = "RunOrTest",
+    metals = {
+      runType = "runOrTestFile",
+      --args = { "firstArg", "secondArg", "thirdArg" },
+    },
+  },
+  {
+    type = "scala",
+    request = "launch",
+    name = "Test Target",
+    metals = {
+      runType = "testTarget",
+    },
+  },
+}
+
+
