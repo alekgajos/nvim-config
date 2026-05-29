@@ -91,7 +91,14 @@ wk.add({
 
 vim.pack.add({
   { src = "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/nvim-lua/plenary.nvim" },
   { src = "https://github.com/nvim-neo-tree/neo-tree.nvim" }
+})
+
+require("neo-tree").setup({
+  filesystem = {
+    hijack_netrw_behavior = "disabled",
+  }
 })
 
 vim.keymap.set("n", "<leader>e", "<Cmd>Neotree<CR>", { desc = "File tree" })
@@ -246,6 +253,12 @@ vim.pack.add({
 })
 
 local dap = require("dap")
+
+vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "Error" })
+vim.fn.sign_define("DapBreakpointCondition", { text = "" , texthl = "Error" })
+vim.fn.sign_define("DapStopped", { text = "󰁕", texthl = "Info"  })
+
+
 local dapui = require("dapui")
 
 require("nvim-dap-virtual-text").setup({})
@@ -266,18 +279,29 @@ end
 
 wk.add({
   { "<leader>d",  group = "DAP" }, -- group
-  { "<leader>pp", vim.diagnostic.open_float, desc = "Peek diagnostics" },
-  { "<leader>pq", vim.diagnostic.setloclist, desc = "Diagnostics to loclist" },
-  { "<leader>pv", toggle_diagnostics,        desc = "Toggle diagnostics" },
+  { "<leader>db", dap.toggle_breakpoint, desc = "DAP Toggle Breakpoint" },
+  { "<leader>dc", dap.continue,          desc = "DAP Continue" },
+  { "<leader>dt", dap.terminate,         desc = "DAP Terminate" },
+  { "<leader>di", dap.step_into,         desc = "DAP Step Into" },
+  { "<leader>do", dap.step_over,         desc = "DAP Step Over" },
+  { "<leader>dO", dap.step_out,          desc = "DAP Step Out" },
+  { "<leader>dr", dap.repl.open,         desc = "DAP REPL" },
+  { "<leader>du", dapui.toggle,          desc = "DAP UI" },
+
+  {
+    "<Leader>dC",
+    function()
+      vim.ui.input({ prompt = "Condition: " }, function(condition)
+        if condition then dap.set_breakpoint(condition) end
+      end)
+    end,
+    desc = "Conditional Breakpoint"
+  },
+  { "<Leader>ds", dap.run_to_cursor, desc = "Run To Cursor" },
+
 })
 
-vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "DAP Toggle Breakpoint" })
-vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "DAP Continue" })
-vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "DAP Step Into" })
-vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "DAP Step Over" })
-vim.keymap.set("n", "<leader>dO", dap.step_out, { desc = "DAP Step Out" })
-vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "DAP REPL" })
-vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "DAP UI" })
+
 
 -- Outline
 vim.pack.add({
@@ -618,5 +642,3 @@ dap.configurations.scala = {
     },
   },
 }
-
-
