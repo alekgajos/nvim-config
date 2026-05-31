@@ -81,7 +81,7 @@ end
 
 local wk = require("which-key")
 wk.add({
-  { "<leader>e",  group = "Problems" }, -- group
+  { "<leader>p",  group = "Problems" }, -- group
   { "<leader>pp", vim.diagnostic.open_float, desc = "Peek diagnostics" },
   { "<leader>pq", vim.diagnostic.setloclist, desc = "Diagnostics to loclist" },
   { "<leader>pv", toggle_diagnostics,        desc = "Toggle diagnostics" },
@@ -101,8 +101,15 @@ require("neo-tree").setup({
   }
 })
 
-vim.keymap.set("n", "<leader>e", "<Cmd>Neotree<CR>", { desc = "File tree" })
-vim.keymap.set("n", "<leader>o", "<Cmd>Neotree toggle<CR>", { desc = "File tree" })
+vim.keymap.set("n", "<leader>e", "<Cmd>Neotree toggle<CR>", { desc = "File tree" })
+vim.keymap.set("n", "<leader>o",
+  function()
+    if vim.bo.filetype == "neo-tree" then
+      vim.cmd.wincmd "p"
+    else
+      vim.cmd.Neotree "focus"
+    end
+  end, { desc = "File tree" })
 
 
 
@@ -255,8 +262,8 @@ vim.pack.add({
 local dap = require("dap")
 
 vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "Error" })
-vim.fn.sign_define("DapBreakpointCondition", { text = "" , texthl = "Error" })
-vim.fn.sign_define("DapStopped", { text = "󰁕", texthl = "Info"  })
+vim.fn.sign_define("DapBreakpointCondition", { text = "", texthl = "Error" })
+vim.fn.sign_define("DapStopped", { text = "󰁕", texthl = "Info" })
 
 
 local dapui = require("dapui")
@@ -301,7 +308,18 @@ wk.add({
 
 })
 
+-- DAP for C++
+dap.adapters.cppdbg = {
+  id = "cppdbg",
+  type = "executable",
+  command = "OpenDebugAD7",
+}
 
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/usr/bin/lldb-vscode-16',
+  name = 'lldb'
+}
 
 -- Outline
 vim.pack.add({
