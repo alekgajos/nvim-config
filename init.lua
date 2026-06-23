@@ -530,7 +530,7 @@ end
 
 -- blink
 vim.pack.add({
-  { src = "https://github.com/Saghen/blink.cmp" },
+  { src = "https://github.com/Saghen/blink.cmp", version = "v1.10.2" },
 })
 require("blink.cmp").setup({
   appearance = {
