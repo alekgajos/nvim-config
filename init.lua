@@ -10,7 +10,7 @@
 -- [x] snacks-indent
 -- [x] Minuet AI
 -- [x] AMP integration
--- [ ] OpenCode integration
+-- [x] OpenCode integration
 -- [x] Clangd toggle source header
 -- [ ] Check what else is needed for completion with 0.12
 -- [x] NeoGit
@@ -37,7 +37,6 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.number = true
 vim.opt.relativenumber = true
-
 
 -- colorscheme
 vim.pack.add({
@@ -433,7 +432,13 @@ require("lualine").setup({
     lualine_c = { { "branch", icon = "" } },
     lualine_x = { "filetype" },
     lualine_y = { "progress" },
-    lualine_z = { "location" },
+    lualine_z = {
+      "location",
+      -- OpenCode connection status (busy/error indicator); wrapped in a
+      -- function so opencode.nvim is only required at redraw time, since
+      -- lualine is set up before the plugin is added further below.
+      function() return require("opencode").statusline() end,
+    },
   },
   tabline = {
     lualine_a = { "buffers" },
@@ -479,6 +484,10 @@ require("snacks").setup({
     only_current = false,
     hl = "SnacksIndent",
   },
+  -- Enhance opencode.nvim's ask() (completions/history) and select() (previews)
+  input = { enabled = true },
+  -- Also replaces vim.ui.select with the snacks picker
+  picker = { enabled = true },
 })
 
 vim.keymap.set("n", "<leader>x", require("snacks").explorer.open)
@@ -529,26 +538,43 @@ if os.getenv("CODESTRAL_API_KEY") then
 end
 
 -- OpenCode
+
 vim.pack.add({
   {
-    src = "https://github.com/nickjvandyke/opencode.nvim",
-    version = vim.version.range("*"), -- Latest stable release
+    src = "https://github.com/nickjvandyke/opencode.nvim", -- main branch for OpenCode v2
+    -- version = vim.version.range("*"), -- Latest stable tag (v1.0.2) — supports OpenCode v1 only
   },
 })
 
----@type opencode.Opts
+vim.api.nvim_create_autocmd('User', {
+  pattern = { 'OpencodeEvent:session.execution.started' },
+  callback = function()
+    local win = require('snacks.terminal').get(opencode_cmd, { create = false })
+    if win then
+      win:show()
+    end
+  end,
+})
+
+-- ---@type opencode.Opts
 vim.g.opencode_opts = {
-  -- Your configuration, if any; goto definition on the type for details
 }
 
+vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this") end, { desc = "Send range to OpenCode", expr = true })
+vim.keymap.set("n", "goo", function() return require("opencode").operator("@this") .. "_" end, { desc = "Send line to OpenCode", expr = true })
 
--- Recommended/example keymaps
-vim.keymap.set({ "n", "x" }, "<C-a>",   function() require("opencode").ask("@this: ") end,                    { desc = "Ask OpenCode…" })
-vim.keymap.set({ "n", "x" }, "<C-x>",   function() require("opencode").select() end,                          { desc = "Select OpenCode…" })
-vim.keymap.set({ "n", "x" }, "go",      function() return require("opencode").operator("@this ") end,         { desc = "Append range to OpenCode", expr = true })
-vim.keymap.set({ "n" },      "goo",     function() return require("opencode").operator("@this ") .. "_" end,  { desc = "Append line to OpenCode", expr = true })
-vim.keymap.set({ "n" },      "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll OpenCode up" })
-vim.keymap.set({ "n" },      "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll OpenCode down" })
+-- One-shot prompts: send the visual selection (or the cursor position) straight
+-- to the OpenCode session, e.g. for an explanation.
+wk.add({
+  { "<leader>a", group = "OpenCode" },
+  { "<leader>aa", function() require("opencode").ask("@this: ") end, desc = "Ask…", mode = { "n", "x" } },
+  { "<leader>as", function() require("opencode").select() end, desc = "Select…", mode = { "n", "x" } },
+  { "<leader>ae", function() require("opencode").prompt("Explain @this and its context") end, desc = "Explain @this", mode = { "n", "x" } },
+  { "<leader>ar", function() require("opencode").prompt("Review @this for correctness and readability") end, desc = "Review @this", mode = { "n", "x" } },
+  { "<leader>ad", function() require("opencode").prompt("Explain @diagnostics") end, desc = "Explain @diagnostics", mode = { "n", "x" } },
+  { "<leader>af", function() require("opencode").prompt("Fix @diagnostics") end, desc = "Fix @diagnostics", mode = { "n", "x" } },
+  { "<leader>at", function() require("opencode").prompt("Add tests for @this") end, desc = "Add tests for @this", mode = { "n", "x" } },
+})
 
 -- blink
 vim.pack.add({
